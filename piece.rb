@@ -7,6 +7,19 @@ class Piece
     populate_board if populate
   end
   
+  def move_diffs
+    # let's see. red at bottom, black at top. x is 0 at the top, 7 at the bottom. 
+    kinged_moves = [
+      [-1, -1],   [-1, +1],
+      #       start
+      [+1, -1],   [+1, +1]
+    ]
+    @color == :black ? dx = +1 : dx = -1
+    return kinged_moves if @kinged
+    
+    [[dx, -1], [dx, +1]]
+  end
+  
   def perform_slide(position)
     old_x, old_y = @position
     new_x, new_y = position
@@ -21,23 +34,14 @@ class Piece
   end
   
   def perform_jump(position)
-    
-  end
-  
-  def move_diffs
-    # let's see. red at bottom, black at top. x is 0 at the top, 7 at the bottom. 
-    kinged_moves = [
-      [-1, -1],   [-1, +1],
-      #       start
-      [+1, -1],   [+1, +1]
-    ]
-    @color == :black ? dx = +1 : dx = -1
-    return kinged_moves if @kinged
-    
-    [[dx, -1], [dx, +1]]
-  end
-  
-  def perform_jump
+    # go over the possible directions
+      # step 1: opposing color
+      # step 2: clear
+      # end up at target position? 
+        # set the new position
+        # move this piece on the board
+        # return true
+    # return false
     
   end
   

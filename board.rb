@@ -11,6 +11,12 @@ class Board
     row, col = pos
     @board[row][col]
   end
+  
+  def retrieve_square(x, y)
+    # returns nil if it's off-board
+    return nil unless x.between?(0, 7) && y.between?(0, 7)
+    board[x][y]
+  end
     
 end
 

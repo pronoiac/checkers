@@ -50,15 +50,12 @@ class Piece
     "#{@color.to_s[0]}#{ @kinged ? "o" : "K" }"
   end
   
-  def retrieve_square(x, y)
-    # returns nil if it's off-board
-    return nil unless x.between?(0, 7) && y.between?(0, 7)
-    @board.board[x][y]
-  end
   
   def perform_jump(position)
     old_x, old_y = @position
     target_x, target_y = position
+    
+    # TODO: calc dx, dy, /2, check if on list.
     
     # go over the possible directions
     self.move_diffs.each do |delta|
@@ -66,23 +63,23 @@ class Piece
     
       # step 1: opposing color
       jumped_x, jumped_y = old_x + dx, old_y + dy
-      square = retrieve_square(jumped_x, jumped_y)
+      square = @board.retrieve_square(jumped_x, jumped_y)
       next if square.nil? # can't jump an empty square or off-board
       next if square.color == self.color # can't jump own piece
       
       # step 2: clear
       land_x, land_y = jumped_x + dx, jumped_y + dy
-      square = retrieve_square(land_x, land_y)
+      square = @board.retrieve_square(land_x, land_y)
       next unless square.nil? # can jump only into an empty square
       
       # end up at target position? 
-      if land_x == target_x && land_y == target_y
-        # set the new position
-        move!([target_x, target_y])
-        # remove the jumped piece
-        @board.board[jumped_x][jumped_y] = nil
-        return true
-      end
+      next unless land_x == target_x && land_y == target_y
+
+      # set the new position
+      move!([target_x, target_y])
+      # remove the jumped piece
+      @board.board[jumped_x][jumped_y] = nil
+      return true
     end # over move_diffs
     # return false
     false

@@ -47,7 +47,7 @@ class Piece
   end
   
   def inspect
-    "#{@color.to_s[0]}#{ @kinged ? "o" : "K" }"
+    "#{@color.to_s[0]}#{ @kinged ? "k" : "o" }"
   end
   
   
@@ -56,6 +56,11 @@ class Piece
     target_x, target_y = position
     
     # TODO: calc dx, dy, /2, check if on list.
+    #dx = target_x - old_x
+    #dy = target_y - old_y
+    # I started sketching this out, then realized, 
+    # int / 2 and rounding complicates things a bit. 
+    # while it's pretty indirect, it currently works. 
     
     # go over the possible directions
     self.move_diffs.each do |delta|
@@ -105,7 +110,7 @@ def testing
   p wp.move_diffs
   p bp.move_diffs
   
-  p minimal
+  p minimal.display_board
   
   puts "slide white to [4, 1]? "
   p wp.perform_slide([4, 1])
@@ -113,17 +118,19 @@ def testing
   puts "slide white to [5, 0]?"
   p wp.perform_slide([5, 0])
   
-  p minimal
+  p minimal.display_board
   
   # debugger
   
   puts "Check jumping."
   puts "slide 2, 1 -> 3, 2"
   p bp.perform_slide([3, 2])
+  p minimal.display_board
+  
   puts "jump 4, 1 -> 2, 3"
   p wp.perform_jump([2, 3])
   
-  p minimal
+  p minimal.display_board
 end
 
 testing

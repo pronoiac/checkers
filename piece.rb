@@ -9,6 +9,8 @@ class Piece
     @position = position
     @kinged = false
     @board = board
+    x, y = position
+    board.board[x][y] = self
   end
   
   def move_diffs
@@ -32,6 +34,7 @@ class Piece
     dx, dy = new_x - old_x, new_y - old_y
     
     return false unless self.move_diffs.include? [dx, dy]
+    return false unless @board.retrieve_square(new_x, new_y).nil?
     
     move!(position)
     true
@@ -90,6 +93,32 @@ class Piece
     false
   end
   
+  def perform_moves!(move_sequence) # , color)
+    # w/o undo, try to follow the list of legal moves.
+    raise InvalidMoveError if move_sequence.length == 0
+    
+    # start_pos = @position
+    # raise InvalidMoveError "Wrong color!" unless self.color == color
+        
+    if move_sequence.length == 1
+      target = move_sequence.first # also, last.
+
+      return true if perform_slide(target)
+      return true if perform_jump(target)
+      
+      # nothing worked. 
+      raise InvalidMoveError "I couldn't parse that into a valid move."
+    end
+    
+    # more than one move. iterate...
+    move_sequence.each do |move|
+      raise InvalidMoveError unless perform_jump(move)
+    end
+    
+    # nothing's gone wrong!
+    true
+  end
+  
   def maybe_promote
   end
 end
@@ -101,16 +130,16 @@ def testing
   wp = Piece.new(:white, [5, 0], minimal)
   bp = Piece.new(:black, [2, 1], minimal)
   
-  puts "placing on board."
+  # puts "placing on board. (part of init now.)"
   # debugger
-  minimal.board[5][0] = wp
-  minimal.board[2][1] = bp
+  #minimal.board[5][0] = wp
+  #minimal.board[2][1] = bp
   
   puts "move directions, white then black"
   p wp.move_diffs
   p bp.move_diffs
   
-  p minimal.display_board
+  minimal.display_board
   
   puts "slide white to [4, 1]? "
   p wp.perform_slide([4, 1])
@@ -118,7 +147,7 @@ def testing
   puts "slide white to [5, 0]?"
   p wp.perform_slide([5, 0])
   
-  p minimal.display_board
+  minimal.display_board
   
   # debugger
   
@@ -130,7 +159,27 @@ def testing
   puts "jump 4, 1 -> 2, 3"
   p wp.perform_jump([2, 3])
   
-  p minimal.display_board
+  minimal.display_board
+  
+  puts "Checking sliding."
+  wp2 = Piece.new(:white, [5, 4], minimal)
+  wp3 = Piece.new(:white, [6, 5], minimal)
+  bp2 = Piece.new(:black, [1, 4], minimal)
+  p wp3.perform_slide([5, 4])
+  minimal.display_board
+  
+  puts "Checking #perform_moves! w/slide - 5, 4 -> 4, 3"
+  wp2.perform_moves!([[4, 3]]) #, :white)
+  minimal.display_board
+  
+  puts "One jump: 1, 4 -> 3, 2"
+  bp2.perform_moves!([[3, 2]])
+  
+  puts "Multiple jumps: 3, 2 -> 5, 4 -> 7, 6"
+  bp2.perform_moves!([[5, 4], [7, 6]])
+  minimal.display_board
+  
+
 end
 
 testing

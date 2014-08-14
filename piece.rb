@@ -2,15 +2,15 @@ require "byebug"
 require_relative "board"
 
 class Piece
-  attr_reader :color, :position
+  attr_reader :color, :position, :kinged
   
-  def initialize(color, position, board)
+  def initialize(board, color, position, kinged = false)
     @color = color
     @position = position
     @kinged = false
     @board = board
     x, y = position
-    board.board[x][y] = self
+    @board.board[x][y] = self
   end
   
   def move_diffs
@@ -121,14 +121,21 @@ class Piece
   
   def maybe_promote
   end
+  
+  def valid_move_seq?(move_sequence)
+    duped_board = @board.dup
+    puts "testing board dup: "
+    duped_board.display_board
+  end
+  
 end
 
 def testing
   minimal = Board.new
   
   puts "making pieces. white, [5, 0]. black, [2, 1]"
-  wp = Piece.new(:white, [5, 0], minimal)
-  bp = Piece.new(:black, [2, 1], minimal)
+  wp = Piece.new(minimal, :white, [5, 0])
+  bp = Piece.new(minimal, :black, [2, 1])
   
   # puts "placing on board. (part of init now.)"
   # debugger
@@ -162,9 +169,9 @@ def testing
   minimal.display_board
   
   puts "Checking sliding."
-  wp2 = Piece.new(:white, [5, 4], minimal)
-  wp3 = Piece.new(:white, [6, 5], minimal)
-  bp2 = Piece.new(:black, [1, 4], minimal)
+  wp2 = Piece.new(minimal, :white, [5, 4])
+  wp3 = Piece.new(minimal, :white, [6, 5])
+  bp2 = Piece.new(minimal, :black, [1, 4])
   p wp3.perform_slide([5, 4])
   minimal.display_board
   
@@ -179,6 +186,21 @@ def testing
   bp2.perform_moves!([[5, 4], [7, 6]])
   minimal.display_board
   
+  puts "Remake board."
+  minimal = Board.new
+  wp = Piece.new(minimal, :white, [5, 0])
+  bp = Piece.new(minimal, :black, [3, 2])
+  wp2 = Piece.new(minimal, :white, [4, 3])
+  wp3 = Piece.new(minimal, :white, [6, 5])
+  bp2 = Piece.new(minimal, :black, [1, 4])
+  minimal.display_board
+  
+  duped_board = minimal.dup
+  puts "testing board dup: "
+  # duped_board.display_board
+  
+  puts "test valid_move_seq? on [5, 4], [7, 6]"
+  bp.valid_move_seq?([[5, 4], [7, 6]])
 
 end
 

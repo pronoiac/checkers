@@ -38,6 +38,17 @@ class Board
     end
     puts header
   end
+  
+  def dup
+    duped_board = Board.new(false)
+    # debugger
+    board.flatten.compact.each do |piece|
+      dupe_piece = piece.class.new(duped_board, piece.color, piece.position.dup, piece.kinged)
+      # automatically placed on board correctly
+    end # iterate over pieces on board    
+    duped_board
+  end
+  
     
 end
 

@@ -1,4 +1,5 @@
 require "byebug"
+#require_relative "piece"
 
 class Board
   attr_accessor :board
@@ -39,9 +40,10 @@ class Board
     puts header
   end
   
+
+  
   def dup
     duped_board = Board.new(false)
-    # debugger
     board.flatten.compact.each do |piece|
       dupe_piece = piece.class.new(duped_board, piece.color, piece.position.dup, piece.kinged)
       # automatically placed on board correctly
@@ -49,12 +51,43 @@ class Board
     duped_board
   end
   
+  def valid_move_seq?(move_sequence)
+    duped_board = @board.dup
+    x, y = move_sequence.shift
+    piece = board[x][y]
+    piece.perform_moves!(move_sequence)
+    true
+  rescue
+    # an error was raised
+    return false    
+  end
+  
     
 end
 
 def testing
-  bo = Board.new
-  debugger
+  # bo = Board.new
+  # debugger
+  
+  puts "Remake board."
+  minimal = Board.new
+  wp = Piece.new(minimal, :white, [5, 0])
+  bp = Piece.new(minimal, :black, [3, 2])
+  wp2 = Piece.new(minimal, :white, [4, 3])
+  wp3 = Piece.new(minimal, :white, [6, 5])
+  bp2 = Piece.new(minimal, :black, [1, 4])
+  minimal.display_board
+  
+  duped_board = minimal.dup
+  puts "testing board dup: "
+  # duped_board.display_board
+  
+  puts "test valid_move_seq? on [3, 2] [5, 4], [7, 6]"
+  p duped_board.valid_move_seq?([[3, 2], [5, 4], [7, 6]])
+  
+  puts "test valid_move_seq? on [3, 2] [5, 4], [7, 7]"
+  p duped_board.valid_move_seq?([[3, 2], [5, 4], [7, 7]])
+  
 end
 
 # testing

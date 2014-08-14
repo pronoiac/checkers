@@ -1,8 +1,8 @@
-require "byebug"
+#require "byebug"
 require_relative "board"
 
 class Piece
-  attr_reader :color, :position, :kinged
+  attr_reader :color, :position, :kinged, :piece
   
   def initialize(board, color, position, kinged = false)
     @color = color
@@ -118,15 +118,10 @@ class Piece
     # nothing's gone wrong!
     true
   end
-  
+    
   def maybe_promote
   end
   
-  def valid_move_seq?(move_sequence)
-    duped_board = @board.dup
-    puts "testing board dup: "
-    duped_board.display_board
-  end
   
 end
 
@@ -199,8 +194,12 @@ def testing
   puts "testing board dup: "
   # duped_board.display_board
   
-  puts "test valid_move_seq? on [5, 4], [7, 6]"
-  bp.valid_move_seq?([[5, 4], [7, 6]])
+  puts "test valid_move_seq? on [3, 2], [5, 4], [7, 6]"
+  duped_board.valid_move_seq?([[3, 2], [5, 4], [7, 6]])
+  duped_board.display_board
+  
+  puts "original:"
+  minimal.display_board
 
 end
 

@@ -2,6 +2,7 @@ require "byebug"
 require_relative "board"
 
 class Piece
+  attr_reader :color, :position
   
   def initialize(color, position, board)
     @color = color
@@ -32,16 +33,27 @@ class Piece
     
     return false unless self.move_diffs.include? [dx, dy]
     
-    @position = position
-    # move on the board.
+    move!(position)
+    true
+  end
+  
+  def move!(position)
+    # doesn't check for valid moves
+    old_x, old_y = @position
+    new_x, new_y = position
     @board.board[new_x][new_y] = self
     @board.board[old_x][old_y] = nil
-    
-    true
+    @position = position
   end
   
   def inspect
     "#{@color.to_s[0]}#{ @kinged ? "o" : "K" }"
+  end
+  
+  def retrieve_square(x, y)
+    # returns nil if it's off-board
+    return nil unless x.between?(0, 7) && y.between?(0, 7)
+    @board.board[x][y]
   end
   
   def perform_jump(position)
@@ -49,26 +61,26 @@ class Piece
     target_x, target_y = position
     
     # go over the possible directions
-    self.move_diffs.each do |dx, dy|
+    self.move_diffs.each do |delta|
+      dx, dy = delta
     
       # step 1: opposing color
-      new_x, new_y = old_x + dx, old_y + dy
-      square = b.board[new_x, new_y]
-      next if square.nil? # can't jump an empty square
+      jumped_x, jumped_y = old_x + dx, old_y + dy
+      square = retrieve_square(jumped_x, jumped_y)
+      next if square.nil? # can't jump an empty square or off-board
       next if square.color == self.color # can't jump own piece
       
       # step 2: clear
-      new_x, new_y = new_x + dx, new_y + dy
-      square = b.board[new_x, new_y]
+      land_x, land_y = jumped_x + dx, jumped_y + dy
+      square = retrieve_square(land_x, land_y)
       next unless square.nil? # can jump only into an empty square
       
       # end up at target position? 
-      if [new_x, new_y] == [target_x, target_y]
+      if land_x == target_x && land_y == target_y
         # set the new position
-        @position = [target_x, target_y]
-        
-        # TODO: move this piece on the board
-        
+        move!([target_x, target_y])
+        # remove the jumped piece
+        @board.board[jumped_x][jumped_y] = nil
         return true
       end
     end # over move_diffs
@@ -81,22 +93,22 @@ class Piece
 end
 
 def testing
-  b = Board.new
+  minimal = Board.new
   
   puts "making pieces. white, [5, 0]. black, [2, 1]"
-  wp = Piece.new(:white, [5, 0], b)
-  bp = Piece.new(:black, [2, 1], b)
+  wp = Piece.new(:white, [5, 0], minimal)
+  bp = Piece.new(:black, [2, 1], minimal)
   
   puts "placing on board."
   # debugger
-  b.board[5][0] = wp
-  b.board[2][1] = bp
+  minimal.board[5][0] = wp
+  minimal.board[2][1] = bp
   
   puts "move directions, white then black"
   p wp.move_diffs
   p bp.move_diffs
   
-  p b
+  p minimal
   
   puts "slide white to [4, 1]? "
   p wp.perform_slide([4, 1])
@@ -104,9 +116,17 @@ def testing
   puts "slide white to [5, 0]?"
   p wp.perform_slide([5, 0])
   
+  p minimal
+  
   # debugger
   
-  p b
+  puts "Check jumping."
+  puts "slide 2, 1 -> 3, 2"
+  p bp.perform_slide([3, 2])
+  puts "jump 4, 1 -> 2, 3"
+  p wp.perform_jump([2, 3])
+  
+  p minimal
 end
 
 testing
